@@ -6,7 +6,7 @@ import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 
 /**
- * exchange 设置fanout类型: 将消息广播
+ * exchange 设置fanout类型: 将消息广播,在类型下，不校验消息的route_key，但是约定都用""
  * 发布与订阅模式：发送消息
  * 重点： exchange 和 queue 为什么都是用申明而不是创建: 因为是幂等的创建，已经存在就获取已存在的，不存在就新建一个获取
  * 生产者只将消息给到exchange， exchange <==route_key===bind====bind_key===> queue，
@@ -27,9 +27,9 @@ public class Producer {
         Connection connection = ConnectionUtil.getConnection();
         //2. 创建频道；
         Channel channel = connection.createChannel();
-        //3. 声明交换机；参数1：交换机名称，参数2：交换机类型（fanout,direct,topic）
+        //3. exchange 声明交换机；参数1：交换机名称，参数2：交换机类型（fanout,direct,topic）
         channel.exchangeDeclare(FANOUT_EXCHANGE, BuiltinExchangeType.FANOUT);
-        //4. 声明队列；
+        //4. queue 声明队列；
         /**
          * 参数1：队列名称
          * 参数2：是否定义持久化队列（消息会持久化保存在服务器上）
@@ -40,9 +40,9 @@ public class Producer {
         channel.queueDeclare(FANOUT_QUEUE_1, true, false, false, null);
         channel.queueDeclare(FANOUT_QUEUE_2, true, false, false, null);
 
-        //5. 交换机 《===》；参数1：队列名称，参数2：交换机名称，参数3：路由key
-        channel.queueBind(FANOUT_QUEUE_1, FANOUT_EXCHANGE, "");
-        channel.queueBind(FANOUT_QUEUE_2, FANOUT_EXCHANGE, "");
+        //5. bind 交换机 《===》；参数1：队列名称，参数2：交换机名称，参数3：路由key
+        channel.queueBind(FANOUT_QUEUE_1, FANOUT_EXCHANGE, "123");
+        channel.queueBind(FANOUT_QUEUE_2, FANOUT_EXCHANGE, "123");
 
         //6. 发送消息；
         for(int i = 1; i<=10; i++) {
@@ -54,7 +54,7 @@ public class Producer {
              * 参数3：消息其它属性
              * 参数4：消息内容
              */
-            channel.basicPublish(FANOUT_EXCHANGE, "", null, message.getBytes());
+            channel.basicPublish(FANOUT_EXCHANGE, "456", null, message.getBytes());
             System.out.println("已发送消息：" + message);
         }
         //6. 关闭资源
