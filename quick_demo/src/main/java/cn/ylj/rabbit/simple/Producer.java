@@ -1,5 +1,6 @@
 package cn.ylj.rabbit.simple;
 
+import cn.ylj.rabbit.util.ConnectionUtil;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
@@ -11,24 +12,11 @@ public class Producer {
     static final String QUEUE_NAME = "simple_queue";
 
     public static void main(String[] args) throws Exception {
-        //1. 创建连接工厂（设置RabbitMQ的连接参数）；
-        ConnectionFactory connectionFactory = new ConnectionFactory();
-            //主机；默认localhost
-        connectionFactory.setHost("121.4.53.107");
-            //连接端口；默认5672
-        connectionFactory.setPort(5672);
-            //虚拟主机；默认/
-        connectionFactory.setVirtualHost("/ylj");
-            //用户名；默认guest
-        connectionFactory.setUsername("admin");
-            //密码；默认guest
-        connectionFactory.setPassword("admin");
-
-        //2. 创建连接；
-        Connection connection = connectionFactory.newConnection();
-        //3. 创建频道；
+        //1.创建连接
+        Connection connection = ConnectionUtil.getConnection();
+        //2.创建频道；
         Channel channel = connection.createChannel();
-        //4. 声明队列；
+        //3.声明队列；
         /**
          * 参数1：队列名称
          * 参数2：是否定义持久化队列（消息会持久化保存在服务器上）
@@ -37,7 +25,7 @@ public class Producer {
          * 参数5：其它参数
          */
         channel.queueDeclare(QUEUE_NAME, true, false, false, null);
-        //5. 发送消息；
+        //4. 发送消息；
         String message = "你好！小兔纸。";
 
         /**
@@ -48,7 +36,7 @@ public class Producer {
          */
         channel.basicPublish("", QUEUE_NAME, null, message.getBytes());
         System.out.println("已发送消息：" + message);
-        //6. 关闭资源
+        //5. 关闭资源
         channel.close();
         connection.close();
     }

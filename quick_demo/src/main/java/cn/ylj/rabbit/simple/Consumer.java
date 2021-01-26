@@ -7,7 +7,9 @@ import com.rabbitmq.client.*;
 import java.io.IOException;
 
 /**
+ * 默认/nameless交换机
  * 简单模式；消费者接收消息
+ * 1对1的，一个消费者是排他exclude独占了一个queue
  */
 public class Consumer {
     public static void main(String[] args) throws Exception {
@@ -33,10 +35,18 @@ public class Consumer {
                 System.out.println("路由key为：" + envelope.getRoutingKey());
                 //交换机
                 System.out.println("交换机为：" + envelope.getExchange());
+                try {
+                    System.out.println("进入20s睡眠");
+                    Thread.sleep(20000);
+                    System.out.println("苏醒");
+                } catch (Exception e){
+                    e.printStackTrace();
+                }
                 //消息id
                 System.out.println("消息id为：" + envelope.getDeliveryTag());
                 //接收到的消息
                 System.out.println("接收到的消息为：" + new String(body, "utf-8"));
+
             }
         };
         //6. 监听队列
